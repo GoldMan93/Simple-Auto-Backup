@@ -1,6 +1,3 @@
-Here is the `README.md` content in markdown format:
-
-````markdown
 # File Transfer Application
 
 This Python-based application enables users to copy files from a source directory to a destination directory. The application supports both copying all files and copying specific files. Additionally, users can set an interval for copying files and track progress through a progress bar and log of transferred files. The application creates folders based on the current date, and each new copy operation increments a counter in the folder name.
@@ -28,7 +25,6 @@ For example, on Ubuntu:
 ```bash
 sudo apt-get install python3-tk
 ```
-````
 
 ## Files
 
@@ -37,23 +33,52 @@ sudo apt-get install python3-tk
 
 ## How to Run
 
-1. Clone or download this repository.
+1. **Download the Executable**:
 
-```bash
-git clone <repository_url>
-```
+   - You can download the pre-built executable for your operating system from the [releases](https://github.com/GoldMan93/auto_backup/releases/tag/Release) section. If you're building it yourself, follow the instructions below.
 
-2. Navigate to the project directory.
+2. **Run the Executable**:
 
-```bash
-cd <project_directory>
-```
+   - **Windows**: Simply double-click on the executable file `ui.exe`.
+   - **macOS/Linux**: Open a terminal, navigate to the folder where the executable is located, and run it using the following command:
 
-3. Run the `ui.py` script to open the application.
+     ```bash
+     ./ui
+     ```
 
-```bash
-python ui.py
-```
+   The application will start, and the graphical user interface will open, allowing you to interact with the program.
+
+3. **Alternatively, Build the Executable Yourself**:
+
+   - If you want to build the executable yourself, follow these steps:
+
+     1. Clone or download this repository.
+
+     ```bash
+     git clone <repository_url>
+     ```
+
+     2. Navigate to the project directory.
+
+     ```bash
+     cd <project_directory>
+     ```
+
+     3. Install PyInstaller if you don't already have it:
+
+     ```bash
+     pip install pyinstaller
+     ```
+
+     4. Package the Python script into a standalone executable by running the following command:
+
+     ```bash
+     pyinstaller --onefile --windowed ui.py
+     ```
+
+     5. After running the above command, you will find the executable in the `dist` directory.
+
+     6. You can now run the executable using the instructions mentioned above.
 
 ## How to Use the Application
 
@@ -96,8 +121,3 @@ Each time files are copied, a new folder is created with the next incremental co
 ## License
 
 This project is open-source. You can freely use and modify it for personal or educational purposes.
-
-```
-
-Just copy and paste this markdown into your `README.md` file.
-```
