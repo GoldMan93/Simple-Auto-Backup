@@ -10,6 +10,8 @@ class FileTransferUI:
         self.root = root
         self.root.title("File Transfer")
         self.is_running = False  # Track the state of the copying process
+        self.copy_interval = tk.IntVar(value=5)  # Default to 5 seconds
+        self.countdown = 0  # For showing the countdown
 
         # Variable to control specific file copying
         self.copy_specific_file = tk.BooleanVar()
@@ -31,15 +33,23 @@ class FileTransferUI:
         self.file_name_entry = tk.Entry(root, width=40)
         self.file_name_entry.grid(row=3, column=1, sticky="ew")
 
+        # Interval setting
+        tk.Label(root, text="Time between copies (seconds):").grid(row=4, column=0, sticky="w")
+        self.interval_entry = tk.Entry(root, textvariable=self.copy_interval, width=5)
+        self.interval_entry.grid(row=4, column=1, sticky="w")
+
         # Buttons in the same row
         self.copy_button = tk.Button(root, text="Copy", command=self.copy_files)
-        self.copy_button.grid(row=4, column=1, sticky="e")
+        self.copy_button.grid(row=5, column=1, sticky="e")
         self.start_button = tk.Button(root, text="Start", command=self.toggle_copying)
-        self.start_button.grid(row=4, column=2)
+        self.start_button.grid(row=5, column=2)
 
-        # Success message label
+        # Success message and countdown
         self.status_label = tk.Label(root, text="", bg="white", anchor="w")
-        self.status_label.grid(row=5, column=0, columnspan=3, sticky="ew")
+        self.status_label.grid(row=6, column=0, sticky="ew")
+
+        self.countdown_label = tk.Label(root, text="", bg="white", anchor="w")
+        self.countdown_label.grid(row=6, column=2, sticky="e")
 
         # Configure column resizing behavior
         root.grid_columnconfigure(1, weight=1)
@@ -73,7 +83,21 @@ class FileTransferUI:
     def start_copying(self):
         while self.is_running:
             self.copy_files()
-            time.sleep(5)  # Pause for 5 seconds between copies
+            self.countdown = self.copy_interval.get()
+            self.update_countdown()
+            for _ in range(self.copy_interval.get()):
+                if not self.is_running:
+                    return  # If stopped, exit
+                time.sleep(1)
+                self.countdown -= 1
+                self.update_countdown()
+
+    def update_countdown(self):
+        """Update the countdown label with the remaining time for the next copy."""
+        if self.countdown > 0:
+            self.countdown_label.config(text=f"Next copy in {self.countdown} sec")
+        else:
+            self.countdown_label.config(text="")
 
     def toggle_copying(self):
         if not self.is_running:
