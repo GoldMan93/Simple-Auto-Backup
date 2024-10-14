@@ -56,11 +56,36 @@ def copy_all_files(source, destination):
 
 def copy_files(source, destination, file_name=None, copy_specific_file=False):
     """
-    Copy files from source to destination. Copy all files or a specific file based on parameters.
+    Copy files from the source folder to the destination folder. If copying specific file, 
+    only that file will be copied.
     """
+    today = datetime.now()
+    date_str = today.strftime("%Y_%b_%d")  # Format like '2024_Oct_14'
+    folder_counter = 1
+    destination_folder = os.path.join(destination, f"{date_str}_{folder_counter}")
+
+    # Check if the folder exists, and if so, increment the counter
+    while os.path.exists(destination_folder):
+        folder_counter += 1
+        destination_folder = os.path.join(destination, f"{date_str}_{folder_counter}")
+    
+    # Create the new folder for today
+    os.makedirs(destination_folder)
+
+    # Copy files to the new folder
     if copy_specific_file and file_name:
-        copy_single_file(source, destination, file_name)
-    elif not copy_specific_file:
-        copy_all_files(source, destination)
+        source_file = os.path.join(source, file_name)
+        if os.path.isfile(source_file):
+            shutil.copy2(source_file, destination_folder)
+        else:
+            raise FileNotFoundError(f"File '{file_name}' not found in source folder.")
     else:
-        raise ValueError("Invalid input: Either 'file_name' must be specified or 'copy_specific_file' must be True.")
+        for item in os.listdir(source):
+            s = os.path.join(source, item)
+            d = os.path.join(destination_folder, item)
+            if os.path.isdir(s):
+                shutil.copytree(s, d)
+            else:
+                shutil.copy2(s, d)
+
+    return destination_folder  # Return the folder that was copied to

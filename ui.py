@@ -6,6 +6,14 @@ import time
 from main_fun import copy_files  # Import the copy function from main_fun.py
 
 class FileTransferUI:
+    import tkinter as tk
+from tkinter import filedialog
+from tkinter import ttk
+import threading
+import time
+from main_fun import copy_files  # Import the copy function from main_fun.py
+
+class FileTransferUI:
     def __init__(self, root):
         self.root = root
         self.root.title("File Transfer")
@@ -15,6 +23,7 @@ class FileTransferUI:
         self.copy_thread = None  # Thread to handle the copying process
         self.copy_specific_file = tk.BooleanVar()  # Variable to control specific file copying
         self.copy_counter = 0  # A counter to track number of copies
+        self.last_folder = ""  # To track the last folder created
 
         # Labels and buttons
         tk.Label(root, text="Source Folder:").grid(row=0, column=0, sticky="w")
@@ -86,14 +95,11 @@ class FileTransferUI:
 
         # Simulate copying process (replace this with your actual file copying logic)
         try:
-            copy_files(source, destination, file_name=file_name, copy_specific_file=self.copy_specific_file.get())
+            self.last_folder = copy_files(source, destination, file_name=file_name, copy_specific_file=self.copy_specific_file.get())
             
             # After copying, update the log
             self.log_text.config(state=tk.NORMAL)  # Enable editing
-            if self.copy_specific_file.get():
-                log_message = f"Copied {file_name} to {destination}."
-            else:
-                log_message = f"Copied files to {destination}."
+            log_message = f"Copied files to folder {self.last_folder}."
             self.log_text.insert(tk.END, log_message + "\n")
             self.log_text.config(state=tk.DISABLED)  # Disable editing
 
@@ -138,7 +144,8 @@ class FileTransferUI:
 
             # Stop the thread after setting the flag
             if self.copy_thread:
-                self.copy_thread.join()  # Ensure the thread finishes
+                self.copy_thread.join()  # Ensure
+
 
     def start_copying(self):
         """
