@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import ttk
 import threading
 import time
-from main_fun import copy_files  # Import the copy function from your file_copy.py
-
+from main_fun import copy_files  # Import the copy function from main_fun.py
 
 class FileTransferUI:
     def __init__(self, root):
@@ -48,6 +48,14 @@ class FileTransferUI:
         self.status_label = tk.Label(root, text="", bg="white", anchor="w")
         self.status_label.grid(row=6, column=0, columnspan=3, sticky="ew")
 
+        # Log of transferred files
+        self.log_text = tk.Text(root, width=60, height=10, state=tk.DISABLED)
+        self.log_text.grid(row=7, column=0, columnspan=3, sticky="ew")
+
+        # Progress bar for copying files
+        self.progress_bar = ttk.Progressbar(root, orient="horizontal", length=400, mode="indeterminate")
+        self.progress_bar.grid(row=8, column=0, columnspan=3, pady=5)
+
         # Configure column resizing behavior
         root.grid_columnconfigure(1, weight=1)
 
@@ -70,13 +78,36 @@ class FileTransferUI:
             self.update_status("Please specify both source and destination folders.", "red")
             return
 
-        copy_files(source, destination, file_name=file_name, copy_specific_file=self.copy_specific_file.get())
-        self.update_status("File(s) copied successfully!", "green")
+        # Start the progress bar
+        self.progress_bar.start()
 
-    def update_status(self, message, color, countdown_message=""):
-        """Update the status label with a message, background color, and optional countdown message."""
-        full_message = f"{message} {countdown_message}"
-        self.status_label.config(text=full_message, bg=color)
+        # Simulate copying process (replace this with your actual file copying logic)
+        try:
+            # Example of copying files (this part should be replaced with your actual copying logic)
+            copy_files(source, destination, file_name=file_name, copy_specific_file=self.copy_specific_file.get())
+            
+            # After copying, update the log
+            self.log_text.config(state=tk.NORMAL)  # Enable editing
+            if self.copy_specific_file.get():
+                log_message = f"Copied {file_name} from \n{source} \nto\n{destination}.\n"
+            else:
+                log_message = f"Copied all files from \n{source} \nto\n{destination}.\n"
+            self.log_text.insert(tk.END, log_message + "\n")
+            self.log_text.config(state=tk.DISABLED)  # Disable editing
+
+            # Stop the progress bar once copying is complete
+            self.progress_bar.stop()
+
+            # Update the UI with the success message
+            self.update_status("File(s) copied successfully!", "green")
+
+        except Exception as e:
+            self.update_status(f"Error: {str(e)}", "red")
+            self.progress_bar.stop()
+
+    def update_status(self, message, color):
+        """Update the status label with a message and background color."""
+        self.status_label.config(text=message, bg=color)
 
     def start_copying(self):
         while self.is_running:
@@ -85,10 +116,10 @@ class FileTransferUI:
             for _ in range(self.copy_interval.get()):
                 if not self.is_running:
                     return  # If stopped, exit
-                self.update_status("File(s) copied successfully!", "green", countdown_message=f"Next copy in {self.countdown} sec")
+                self.update_status("File(s) copied successfully!", "green")
                 time.sleep(1)
                 self.countdown -= 1
-            self.update_status("Copying in progress...", "yellow")  # Update when waiting for the next copy
+            self.update_status("Copying in progress...", "yellow")
 
     def toggle_copying(self):
         if not self.is_running:
