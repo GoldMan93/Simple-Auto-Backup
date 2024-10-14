@@ -12,9 +12,9 @@ class FileTransferUI:
         self.is_running = False  # Track the state of the copying process
         self.copy_interval = tk.IntVar(value=5)  # Default to 5 seconds
         self.countdown = 0  # For showing the countdown
-
-        # Variable to control specific file copying
-        self.copy_specific_file = tk.BooleanVar()
+        self.copy_thread = None  # Thread to handle the copying process
+        self.copy_specific_file = tk.BooleanVar()  # Variable to control specific file copying
+        self.copy_counter = 0  # A counter to track number of copies
 
         # Labels and buttons
         tk.Label(root, text="Source Folder:").grid(row=0, column=0, sticky="w")
@@ -70,6 +70,9 @@ class FileTransferUI:
         self.destination_entry.insert(0, folder_selected)
 
     def copy_files(self):
+        """
+        Perform the file copy operation.
+        """
         source = self.source_entry.get()
         destination = self.destination_entry.get()
         file_name = self.file_name_entry.get() if self.copy_specific_file.get() else None
@@ -83,15 +86,14 @@ class FileTransferUI:
 
         # Simulate copying process (replace this with your actual file copying logic)
         try:
-            # Example of copying files (this part should be replaced with your actual copying logic)
             copy_files(source, destination, file_name=file_name, copy_specific_file=self.copy_specific_file.get())
             
             # After copying, update the log
             self.log_text.config(state=tk.NORMAL)  # Enable editing
             if self.copy_specific_file.get():
-                log_message = f"Copied {file_name} from \n{source} \nto\n{destination}.\n"
+                log_message = f"Copied {file_name} to {destination}."
             else:
-                log_message = f"Copied all files from \n{source} \nto\n{destination}.\n"
+                log_message = f"Copied files to {destination}."
             self.log_text.insert(tk.END, log_message + "\n")
             self.log_text.config(state=tk.DISABLED)  # Disable editing
 
@@ -124,10 +126,19 @@ class FileTransferUI:
         if not self.is_running:  # If not running, start the copy process
             self.is_running = True
             self.start_button.config(text="Stop")  # Change button text to "Stop"
-            self.start_copying()  # Start the copying process
+
+            # Start the copying thread
+            self.copy_thread = threading.Thread(target=self.start_copying)
+            self.copy_thread.daemon = True  # Daemon thread to exit when the app closes
+            self.copy_thread.start()
+
         else:  # If running, stop it
             self.is_running = False
             self.start_button.config(text="Start")  # Change button text back to "Start"
+
+            # Stop the thread after setting the flag
+            if self.copy_thread:
+                self.copy_thread.join()  # Ensure the thread finishes
 
     def start_copying(self):
         """
