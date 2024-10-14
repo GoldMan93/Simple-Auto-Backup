@@ -1,47 +1,46 @@
 import shutil
 import os
 
-def copy_files(source_folder, destination_folder, file_name=None, copy_specific_file=False):
-    # Check if source folder exists
-    if not os.path.exists(source_folder):
-        print(f"The source folder {source_folder} does not exist.")
-        return
+def copy_single_file(source, destination, file_name):
+    """
+    Copy a specific file from source to destination.
+    """
+    src_file = os.path.join(source, file_name)
+    dest_file = os.path.join(destination, file_name)
     
-    # Make sure the destination folder exists
-    if not os.path.exists(destination_folder):
-        os.makedirs(destination_folder)
+    if not os.path.exists(src_file):
+        raise FileNotFoundError(f"File '{file_name}' not found in source directory.")
+
+    shutil.copy(src_file, dest_file)
+    print(f"Successfully copied {file_name} to {destination}")
+
+
+def copy_all_files(source, destination):
+    """
+    Copy all files from source to destination.
+    """
+    if not os.path.exists(source):
+        raise FileNotFoundError(f"Source directory '{source}' not found.")
     
-    # If copying a specific file
-    if copy_specific_file and file_name:
-        source_path = os.path.join(source_folder, file_name)
-        destination_path = os.path.join(destination_folder, file_name)
+    if not os.path.exists(destination):
+        os.makedirs(destination)  # Create destination folder if it doesn't exist
+
+    for file_name in os.listdir(source):
+        src_path = os.path.join(source, file_name)
+        dest_path = os.path.join(destination, file_name)
         
-        # Check if the specific file exists
-        if os.path.isfile(source_path):
-            shutil.copy2(source_path, destination_path)
-            print(f"Copied {file_name} to {destination_folder}")
-        else:
-            print(f"The file {file_name} does not exist in {source_folder}.")
-    
-    # If copying all files
+        if os.path.isfile(src_path):
+            shutil.copy(src_path, dest_path)
+            print(f"Successfully copied {file_name} to {destination}")
+
+def copy_files(source, destination, file_name=None, copy_specific_file=False):
+    """
+    Copy files from source to destination. Copy all files or a specific file based on parameters.
+    """
+    if copy_specific_file and file_name:
+        copy_single_file(source, destination, file_name)
     elif not copy_specific_file:
-        for file_name in os.listdir(source_folder):
-            source_path = os.path.join(source_folder, file_name)
-            destination_path = os.path.join(destination_folder, file_name)
-            
-            # Check if it's a file (not a directory)
-            if os.path.isfile(source_path):
-                shutil.copy2(source_path, destination_path)
-                print(f"Copied {file_name} to {destination_folder}")
+        copy_all_files(source, destination)
+    else:
+        raise ValueError("Invalid input: Either 'file_name' must be specified or 'copy_specific_file' must be True.")
 
-# Example usage
-source_folder = "C:/path/to/source/folder"
-destination_folder = "C:/path/to/destination/folder"
-specific_file_name = "file.txt"  # Specify the file name if needed
-
-
-# To copy a specific file, set copy_specific_file to True
-copy_files(source_folder, destination_folder, file_name=specific_file_name, copy_specific_file=True)
-
-# To copy all files, set copy_specific_file to False
-# copy_files(source_folder, destination_folder, copy_specific_file=False)
