@@ -109,28 +109,33 @@ class FileTransferUI:
         """Update the status label with a message and background color."""
         self.status_label.config(text=message, bg=color)
 
-    def start_copying(self):
-        while self.is_running:
-            self.copy_files()
-            self.countdown = self.copy_interval.get()
-            for _ in range(self.copy_interval.get()):
-                if not self.is_running:
-                    return  # If stopped, exit
-                self.update_status("File(s) copied successfully!", "green")
-                time.sleep(1)
-                self.countdown -= 1
-            self.update_status("Copying in progress...", "yellow")
-
     def toggle_copying(self):
-        if not self.is_running:
-            # Start the copying process
+        """
+        Toggle the copying process. Start copying when 'Start' is pressed, and stop when 'Stop' is pressed.
+        """
+        source = self.source_entry.get()
+        destination = self.destination_entry.get()
+
+        # Check if source or destination is empty and show an error if so
+        if not source or not destination:
+            self.update_status("Please specify both source and destination folders.", "red")
+            return
+
+        if not self.is_running:  # If not running, start the copy process
             self.is_running = True
-            self.start_button.config(text="Stop")
-            threading.Thread(target=self.start_copying, daemon=True).start()
-        else:
-            # Stop the copying process
+            self.start_button.config(text="Stop")  # Change button text to "Stop"
+            self.start_copying()  # Start the copying process
+        else:  # If running, stop it
             self.is_running = False
-            self.start_button.config(text="Start")
+            self.start_button.config(text="Start")  # Change button text back to "Start"
+
+    def start_copying(self):
+        """
+        Start the copying process in a loop, copying files every X seconds.
+        """
+        while self.is_running:
+            self.copy_files()  # Perform the copy operation
+            time.sleep(self.copy_interval.get())  # Sleep for the specified interval (in seconds)
 
 
 # Run the UI
